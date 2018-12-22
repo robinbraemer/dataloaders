@@ -66,7 +66,7 @@ func (l *AttrDataLoader) Load(attribute Attribute, key Key) (Value, error) {
 	if loader := l.loader(attribute); loader != nil {
 		value, err := loader.Load(key)
 		if err == nil {
-			l.RunPrimer(value, attribute)
+			l.RunPropagator(value, attribute)
 		}
 		return value, err
 	} else {
@@ -78,7 +78,7 @@ func (l *AttrDataLoader) LoadAll(attribute Attribute, keys []Key) ([]Value, []er
 	if loader := l.loader(attribute); loader != nil {
 		values, errs := loader.LoadAll(keys)
 		for val := range values {
-			l.RunPrimer(val, attribute)
+			l.RunPropagator(val, attribute)
 		}
 		return values, errs
 	} else {
@@ -86,11 +86,11 @@ func (l *AttrDataLoader) LoadAll(attribute Attribute, keys []Key) ([]Value, []er
 	}
 }
 
-// Runs the primer if registered for the attribute.
-func (l *AttrDataLoader) RunPrimer(value Value, attribute Attribute) {
-	primer, exists := l.propagators[attribute]
+// Runs the propagator if registered for the attribute.
+func (l *AttrDataLoader) RunPropagator(value Value, attribute Attribute) {
+	propagator, exists := l.propagators[attribute]
 	if exists {
-		primer(value, l)
+		propagator(value, l)
 	}
 }
 
