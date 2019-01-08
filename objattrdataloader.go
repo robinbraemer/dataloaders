@@ -38,7 +38,7 @@ func (l *ObjAttrDataLoader) Load(objectType ObjectType, attribute Attribute, key
 	if loader := l.loader(objectType); loader != nil {
 		return loader.Load(attribute, key)
 	} else {
-		return nil, fmt.Errorf("no dataloader for objectType '%s' registered", objectType)
+		return nil, NewObjTypeNotRegError(fmt.Sprintf("no dataloader for objectType '%s' registered", objectType))
 	}
 }
 
@@ -46,7 +46,7 @@ func (l *ObjAttrDataLoader) LoadAll(objectType ObjectType, attribute Attribute, 
 	if loader := l.loader(objectType); loader != nil {
 		return loader.LoadAll(attribute, keys)
 	} else {
-		return nil, []error{fmt.Errorf("no dataloader for objectType '%s' registered", objectType)}
+		return nil, []error{NewObjTypeNotRegError(fmt.Sprintf("no dataloader for objectType '%s' registered", objectType))}
 	}
 }
 
@@ -91,4 +91,17 @@ func (l *ObjAttrDataLoader) loader(objectType ObjectType) *AttrDataLoader {
 	}
 	// Loader not registered.
 	return nil
+}
+
+// Occurs when an unregistered object type is requested.
+type ObjTypeNotRegError struct {
+	msg string
+}
+
+func (e *ObjTypeNotRegError) Error() string {
+	return e.msg
+}
+
+func NewObjTypeNotRegError(msg string) error {
+	return &ObjTypeNotRegError{msg: msg}
 }

@@ -70,7 +70,7 @@ func (l *AttrDataLoader) Load(attribute Attribute, key Key) (Value, error) {
 		}
 		return value, err
 	} else {
-		return nil, fmt.Errorf("no dataloader for attribute '%s' registered", attribute)
+		return nil, NewAttrNotRegError(fmt.Sprintf("no dataloader for attribute '%s' registered", attribute))
 	}
 }
 
@@ -82,7 +82,7 @@ func (l *AttrDataLoader) LoadAll(attribute Attribute, keys []Key) ([]Value, []er
 		}
 		return values, errs
 	} else {
-		return nil, []error{fmt.Errorf("no dataloader for attribute '%s' registered", attribute)}
+		return nil, []error{NewAttrNotRegError(fmt.Sprintf("no dataloader for attribute '%s' registered", attribute))}
 	}
 }
 
@@ -135,4 +135,17 @@ func (l *AttrDataLoader) loader(attribute Attribute) *DataLoader {
 	}
 	// Loader not registered.
 	return nil
+}
+
+// Occurs when an unregistered attribute is requested.
+type AttrNotRegError struct {
+	msg string
+}
+
+func (e *AttrNotRegError) Error() string {
+	return e.msg
+}
+
+func NewAttrNotRegError(msg string) error {
+	return &AttrNotRegError{msg: msg}
 }
