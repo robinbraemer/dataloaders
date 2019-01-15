@@ -60,7 +60,7 @@ type ValuePropagators map[Attribute]ValuePropagator
 // 		How?:
 // 			You can propagate/prime a cache using l.Prime(attribute, key, value).
 type ValuePropagator func(loadedValue Value, l *AttrDataLoader)
-type Attribute string
+type Attribute interface{}
 
 func (l *AttrDataLoader) Load(attribute Attribute, key Key) (Value, error) {
 	if loader := l.loader(attribute); loader != nil {
@@ -96,11 +96,20 @@ func (l *AttrDataLoader) RunPropagator(value Value, attribute Attribute) {
 
 // Prime the cache with the provided attribute, key and value.
 // If the key already exists, no change is made
-// and false is returned. Returns true if forced. Returns false if attribute not registered.
-// (To forcefully prime the cache, use forcePrime = true.)
-func (l *AttrDataLoader) Prime(attribute Attribute, key Key, value Value, forcePrime bool) bool {
+// and false is returned. Returns false if attribute not registered.
+// (To forcefully prime the cache, use l.ForcePrime().)
+func (l *AttrDataLoader) Prime(attribute Attribute, key Key, value Value) bool {
+	return l.prime(attribute, key, value, false)
+}
+
+// Forcefully prime the cache with the provided attribute, key and value.
+func (l *AttrDataLoader) ForcePrime(attribute Attribute, key Key, value Value) {
+	l.prime(attribute, key, value, true)
+}
+
+func (l *AttrDataLoader) prime(attribute Attribute, key Key, value Value, forcePrime bool) bool {
 	if loader := l.loader(attribute); loader != nil {
-		return loader.Prime(key, value, forcePrime)
+		return loader.prime(key, value, forcePrime)
 	}
 	return false
 }

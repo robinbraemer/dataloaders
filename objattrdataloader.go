@@ -26,7 +26,7 @@ type ObjAttrDataLoader struct {
 	mu sync.Mutex
 }
 
-type ObjectType string
+type ObjectType interface{}
 
 // ObjAttrDataLoader initializers map
 type ObjAttrDataLoaderInits map[ObjectType]func() *AttrDataLoader
@@ -50,13 +50,22 @@ func (l *ObjAttrDataLoader) LoadAll(objectType ObjectType, attribute Attribute, 
 	}
 }
 
-// Prime the cache with the provided objectType, attribute and key and value.
+// Prime the cache with the provided objectType, attribute, key and value.
 // If the key already exists, no change is made
-// and false is returned. Returns true if forced. Returns false if objectType or attribute not registered.
-// (To forcefully prime the cache, use forcePrime = true.)
-func (l *ObjAttrDataLoader) Prime(objectType ObjectType, attribute Attribute, key Key, value Value, forcePrime bool) bool {
+// and false is returned. Returns false if attribute not registered.
+// (To forcefully prime the cache, use l.ForcePrime().)
+func (l *ObjAttrDataLoader) Prime(objectType ObjectType, attribute Attribute, key Key, value Value) bool {
+	return l.prime(objectType, attribute, key, value, false)
+}
+
+// Forcefully prime the cache with the provided objectType, attribute, key and value.
+func (l *ObjAttrDataLoader) ForcePrime(objectType ObjectType, attribute Attribute, key Key, value Value) bool {
+	return l.prime(objectType, attribute, key, value, true)
+}
+
+func (l *ObjAttrDataLoader) prime(objectType ObjectType, attribute Attribute, key Key, value Value, forcePrime bool) bool {
 	if loader := l.loader(objectType); loader != nil {
-		return loader.Prime(attribute, key, value, forcePrime)
+		return loader.prime(attribute, key, value, forcePrime)
 	}
 	return false
 }
@@ -104,4 +113,17 @@ func (e *ObjTypeNotRegError) Error() string {
 
 func NewObjTypeNotRegError(msg string) error {
 	return &ObjTypeNotRegError{msg: msg}
+}
+
+// Returns true if the error occourd when running the loader to resolve data.
+func IsLoadingError(err error) bool {
+	if err != nil {
+		switch err.(type) {
+		case *ObjTypeNotRegError:
+			return false
+		case *AttrNotRegError:
+			return false
+		}
+	}
+	return true
 }

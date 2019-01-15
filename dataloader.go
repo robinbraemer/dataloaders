@@ -121,8 +121,20 @@ func (l *DataLoader) LoadAll(keys []Key) ([]Value, []error) {
 // Prime the cache with the provided key and value.
 // If the key already exists, no change is made
 // and false is returned. Returns true if forced.
-// (To forcefully prime the cache, use forcePrime = true.)
-func (l *DataLoader) Prime(key Key, value Value, forcePrime bool) bool {
+// (To forcefully prime the cache, use l.ForcePrime.)
+func (l *DataLoader) Prime(key Key, value Value) bool {
+	return l.prime(key, value, false)
+}
+
+// Prime the cache with the provided key and value.
+// If the key already exists, no change is made
+// and false is returned. Returns true if forced.
+// (To not forcefully prime the cache, use l.Prime.)
+func (l *DataLoader) ForcePrime(key Key, value Value) bool {
+	return l.prime(key, value, true)
+}
+
+func (l *DataLoader) prime(key Key, value Value, forcePrime bool) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -133,9 +145,7 @@ func (l *DataLoader) Prime(key Key, value Value, forcePrime bool) bool {
 		if _, found = l.cache[key]; !found {
 			primeIt = true
 		}
-	}
-
-	if primeIt {
+	} else {
 		l.unsafeSet(key, value)
 	}
 	return primeIt
