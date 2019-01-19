@@ -115,8 +115,8 @@ func NewObjTypeNotRegError(msg string) error {
 	return &ObjTypeNotRegError{msg: msg}
 }
 
-// Returns true if the error occourd when running the loader to resolve data.
-func IsLoadingError(err error) bool {
+// Returns true if the error is occurred when running the loader to resolve data.
+func IsResolverError(err error) bool {
 	if err != nil {
 		switch err.(type) {
 		case *ObjTypeNotRegError:
