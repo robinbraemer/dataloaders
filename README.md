@@ -153,8 +153,6 @@ Robin Brämer – [@robinbraemer](https://github.com/robinbraemer)
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
-
 The DataLoader is inspired by https://github.com/facebook/dataloaders
 and the underlying loader by https://github.com/vektah/dataloaden.
 
